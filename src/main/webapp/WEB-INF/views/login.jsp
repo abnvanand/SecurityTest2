@@ -14,7 +14,7 @@
 </head>
 <body>
 <% if (request.getParameter("error") != null) {
-    out.println("ERROR LOGIN");
+    out.println("Invalid Username Or Password");
 }
 %>
 <form method="post" action="/j_spring_security_check">

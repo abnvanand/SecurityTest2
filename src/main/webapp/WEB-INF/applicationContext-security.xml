@@ -7,22 +7,26 @@
        http://www.springframework.org/schema/security
        http://www.springframework.org/schema/security/spring-security.xsd">
 
-    <security:http auto-config="true" entry-point-ref="digestEntryPoint">
-        <!--        <security:form-login login-page="/custom_login"
-                                     authentication-failure-handler-ref="serverErrorHandler"
-                                     authentication-failure-url="/custom_login?error"
-                                     username-parameter="user_param"
-                                     password-parameter="pass_param"/>-->
-        <security:custom-filter ref="digestFilter"
-                                before="BASIC_AUTH_FILTER"/>
+    <!--<security:http auto-config="true" entry-point-ref="digestEntryPoint">-->
+    <security:http auto-config="true">
+
+        <!--Folowing is an attribute of form-login-->
+        <!--authentication-failure-handler-ref="serverErrorHandler"-->
+        <security:form-login login-page="/custom_login"
+                             authentication-failure-url="/custom_login?error"
+                             username-parameter="user_param"
+                             password-parameter="pass_param"/>
+        <security:logout delete-cookies="JSESSIONID" logout-success-url="/custom_login"/>
+        <!-- <security:custom-filter ref="digestFilter"
+                                 before="BASIC_AUTH_FILTER"/>-->
         <!--<security:http-basic />-->
         <security:intercept-url pattern="/admin/**/*" access="ROLE_ADMIN"/>
     </security:http>
 
     <!--Beans-->
-    <bean id="serverErrorHandler" class="com.apress.pss.terrormovies.security.ServerErrorFailureHandler"/>
+    <!--<bean id="serverErrorHandler" class="com.apress.pss.terrormovies.security.ServerErrorFailureHandler"/>-->
 
-    <bean id="digestFilter" class=
+    <!--<bean id="digestFilter" class=
             "org.springframework.security.web.authentication.www.DigestAuthenticationFilter">
         <property name="userDetailsService" ref="userService"/>
         <property name="authenticationEntryPoint" ref="digestEntryPoint"/>
@@ -32,12 +36,17 @@
             "org.springframework.security.web.authentication.www.DigestAuthenticationEntryPoint">
         <property name="realmName" value="terrormovies-realm"/>
         <property name="key" value="terrorific"/>
-    </bean>
+    </bean>-->
 
+    <!--<bean id="logoutRedirectToAny"-->
+          <!--class="org.springframework.security.web.authentication.logout.SimpleUrlLogoutSuccessHandler">-->
+        <!--<property name="targetUrlParameter" value="redirectTo" />-->
+    <!--</bean>-->
 
     <security:authentication-manager>
         <security:authentication-provider>
-            <security:user-service id="userService">
+            <!--<security:user-service id="userService">-->
+            <security:user-service>
                 <security:user name="admin" authorities="ROLE_ADMIN" password="admin"/>
             </security:user-service>
         </security:authentication-provider>
