@@ -1,54 +1,56 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
-       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:security="http://www.springframework.org/schema/security"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
-       http://www.springframework.org/schema/beans/spring-beans.xsd
-       http://www.springframework.org/schema/security
-       http://www.springframework.org/schema/security/spring-security.xsd">
+ http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+ http://www.springframework.org/schema/security
+ http://www.springframework.org/schema/security/spring-security-3.1.xsd">
 
-    <!--<security:http auto-config="true" entry-point-ref="digestEntryPoint">-->
-    <security:http auto-config="true">
-
-        <!--Folowing is an attribute of form-login-->
-        <!--authentication-failure-handler-ref="serverErrorHandler"-->
+    <security:http auto-config="true" access-decision-manager-ref="accessDecisionManager">
+        <security:intercept-url pattern="/admin/*"
+                                access="ROLE_ADMIN"/>
+        <!--<security:remember-me key="terror-key"/>-->
+        <security:logout delete-cookies="JSESSIONID" success-handler-ref="logoutRedirectToAny"/>
         <security:form-login login-page="/custom_login"
-                             authentication-failure-url="/custom_login?error"
-                             username-parameter="user_param"
-                             password-parameter="pass_param"/>
-        <security:logout delete-cookies="JSESSIONID" logout-success-url="/custom_login"/>
-        <!-- <security:custom-filter ref="digestFilter"
-                                 before="BASIC_AUTH_FILTER"/>-->
-        <!--<security:http-basic />-->
-        <security:intercept-url pattern="/admin/**/*" access="ROLE_ADMIN"/>
+                             authentication-failure-handler-ref="serverErrorHandler"
+                             username-parameter="user_param" password-parameter="pass_param"/>
     </security:http>
+    <bean id="accessDecisionManager" class="org.springframework.security.access.vote.UnanimousBased">
+        <constructor-arg>
+            <list>
+                <bean class="org.springframework.security.access.vote.RoleVoter"/>
+                <bean class="org.springframework.security.access.vote.AuthenticatedVoter"/>
+            </list>
+        </constructor-arg>
+    </bean>
+    <security:authentication-manager>
+        <security:authentication-provider user-service-ref="inMemoryUserServiceWithCustomUser"/>
+    </security:authentication-manager>
 
-    <!--Beans-->
-    <!--<bean id="serverErrorHandler" class="com.apress.pss.terrormovies.security.ServerErrorFailureHandler"/>-->
-
-    <!--<bean id="digestFilter" class=
-            "org.springframework.security.web.authentication.www.DigestAuthenticationFilter">
-        <property name="userDetailsService" ref="userService"/>
-        <property name="authenticationEntryPoint" ref="digestEntryPoint"/>
+    <bean id="inMemoryUserServiceWithCustomUser"
+          class="com.apress.pss.terrormovies.spring.CustomInMemoryUserDetailsManager">
+        <constructor-arg>
+            <list>
+                <bean class="com.apress.pss.terrormovies.model.User">
+                    <constructor-arg value="admin"/>
+                    <constructor-arg value="admin"/>
+                    <constructor-arg>
+                        <list>
+                            <bean class="org.springframework.security.core.authority.SimpleGrantedAuthority">
+                                <constructor-arg value="ROLE_ADMIN"/>
+                            </bean>
+                        </list>
+                    </constructor-arg>
+                    <constructor-arg value="Anand"/>
+                </bean>
+            </list>
+        </constructor-arg>
     </bean>
 
-    <bean id="digestEntryPoint" class=
-            "org.springframework.security.web.authentication.www.DigestAuthenticationEntryPoint">
-        <property name="realmName" value="terrormovies-realm"/>
-        <property name="key" value="terrorific"/>
-    </bean>-->
-
-    <!--<bean id="logoutRedirectToAny"-->
-          <!--class="org.springframework.security.web.authentication.logout.SimpleUrlLogoutSuccessHandler">-->
-        <!--<property name="targetUrlParameter" value="redirectTo" />-->
-    <!--</bean>-->
-
-    <security:authentication-manager>
-        <security:authentication-provider>
-            <!--<security:user-service id="userService">-->
-            <security:user-service>
-                <security:user name="admin" authorities="ROLE_ADMIN" password="admin"/>
-            </security:user-service>
-        </security:authentication-provider>
-    </security:authentication-manager>
+    <bean id="logoutRedirectToAny"
+          class="org.springframework.security.web.authentication.logout.SimpleUrlLogoutSuccessHandler">
+        <property name="targetUrlParameter" value="redirectTo"/>
+    </bean>
+    <bean id="serverErrorHandler" class="com.apress.pss.terrormovies.security.ServerErrorFailureHandler"/>
 </beans>
